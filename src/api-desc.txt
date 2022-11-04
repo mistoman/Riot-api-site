@@ -1,0 +1,101 @@
+//calls the region and name of a user giving you there "puuid" that you use to get most of the api calls data
+
+https://eun1.api.riotgames.com/lol/summoner/v4/summoners/by-name/forsakensushibar
+
+example:
+{
+    "id": "ws7lgeIcQCld5S4BCpecvRhtYdeGm3Am-ivFWErrhV6jqyg",
+    "accountId": "ab9gSZHuexwl08kZ5EOWlayAPzCGT7J2YYY484EisKFXsUU",
+    "puuid": "OgNuFT7E4AKTiZYmnkpf-iA-RW4aOwcPfWAyJVxNx1mW4CPghM0DBu0uSynjXLVn43uLUmbPoN_FBA",
+    "name": "ForsakenSushiBar",
+    "profileIconId": 578,
+    "revisionDate": 1664673614000,
+    "summonerLevel": 343
+}
+<|>
+
+//match-v5 calls matches and gives you there id to call
+https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/OgNuFT7E4AKTiZYmnkpf-iA-RW4aOwcPfWAyJVxNx1mW4CPghM0DBu0uSynjXLVn43uLUmbPoN_FBA/ids?start=0&count=10&api_key=RGAPI-35106fac-a040-4ee4-95bc-1b2b9487dfd3
+
+example:
+[
+    "EUN1_3227844992",
+    "EUN1_3227836484",
+    "EUN1_3227831408",
+    "EUN1_3227821561",
+    "EUN1_3227810242",
+    "EUN1_3227796657",
+    "EUN1_3227782552",
+    "EUN1_3227767091",
+    "EUN1_3227747840",
+    "EUN1_3227733203"
+]
+
+//get match info with match-v5 api call
+https://europe.api.riotgames.com/lol/match/v5/matches/EUN1_3227844992
+example:
+alot of info...
+
+
+
+//old code
+
+const summonerDetailsRequest = () => {
+  var myapikey = "?api_key=RGAPI-RGAPI-22983876-5c41-43dc-98f4-a24cbdf6849a";
+  axios
+    .get('https://eun1.api.riotgames.com/lol/summoner/v4/summoners/by-name/forsakensushibar'+myapikey,{  mode: 'no-cors' })
+      .then((summonerDetails) => {
+        summonerDetails.value = summonerDetails.data;
+        //console.log(" Summoner Name PUUID ",summonerDetails.data)
+        //console.log(" Summoner Name PUUID ",summonerDetails.data.puuid)
+        //console.log(" Summoner Name PUUID ",summonerDetails.data.name)
+      })
+      
+      return;
+}
+
+
+
+ const test1 = () => {
+  var myapikey = "api_key=RGAPI-22983876-5c41-43dc-98f4-a24cbdf6849a";
+  //console.log('test1')
+  axios
+    .get('https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/OgNuFT7E4AKTiZYmnkpf-iA-RW4aOwcPfWAyJVxNx1mW4CPghM0DBu0uSynjXLVn43uLUmbPoN_FBA/ids?start=0&count=10&'+myapikey)
+      .then((response) => {
+        response.data
+        //console.log(" Summoner Match history ",response.data) 
+
+      })
+      return;
+} 
+
+//https://europe.api.riotgames.com/lol/match/v5/matches/EUN1_3232306484?api_key=RGAPI-1c91d98b-f7aa-4d45-9a4b-b3abe1a2fdd6
+
+ const test2 = () => {
+  var myapikey = "?api_key=RGAPI-22983876-5c41-43dc-98f4-a24cbdf6849a";
+  //console.log('test2')
+  axios
+    .get('https://europe.api.riotgames.com/lol/match/v5/matches/EUN1_3232306484'+myapikey)
+      .then((response) => {
+        response.data
+        //console.log(" Summoner Match info ",response.data)
+        //console.log(" Summoner Match participant ",response.data)
+        for (let i = 0; i < response.data.info.participants.length; i++) {
+          //console.log(" Summoner Match participant: ",response.data.info.participants[i].summonerName)
+          //console.log(" Summoner Match participant: ",response.data.info.participants[i])
+          
+        }
+
+      })
+      return;
+}
+
+
+
+
+<!--             
+            <h2 class="searched-player-name" v-if="playername === players.summonerName.toLowerCase()">{{ players.summonerName }}</h2>
+        
+            <img class="searched-player-img" v-if="playername.toLowerCase() === players.summonerName.toLowerCase()" :src="`http://ddragon.leagueoflegends.com/cdn/12.21.1/img/champion/${ players.championName }.png`">
+            
+ -->         
