@@ -1,13 +1,16 @@
 <template>
 <nav>
-      <form class="summoner-search" @submit="getSummonerDetails">
+      <router-link v-if="(store.getters.userId !== null)" v-bind:to="'/user/' + userID">
+        <button>My Profile</button>
+      </router-link>
+      <form class="summoner-search" @submit.prevent="getSummonerDetails">
         <select @change="changeRegion" name="" id="" v-model="playerRegion" required>
           <option value="eun1">EUNE</option>
           <option value="euw1">EUW</option>
           <option value="na1">NA</option>
           <option value="kr">KR</option>
           <option value="jp1">JP</option>
-          <option value="jp1">JP</option>
+          <option value="br1">BR</option>
           <option value="la1">LAN</option>
           <option value="la2">LAS</option>
           <option value="oc1">OCE</option>
@@ -17,13 +20,15 @@
         <input type="text" placeholder="Summoner Name" v-model="playerNameRef" required>
         <button>Search</button>
       </form>
+
+
 </nav>
   <div>
 
     <div class="summoner-panel" v-if="summonerDetails && SummonerMatchHistoryDetails">
-      <img :src="`https://ddragon.leagueoflegends.com/cdn/12.20.1/img/profileicon/${ summonerDetails.profileIconId }.png`">
-      <h1>Name: {{ summonerDetails.name }}</h1>
-      <h2>Level: {{ summonerDetails.summonerLevel }}</h2>
+
+      <SummonerProfile :summonerDetails="summonerDetails"/>
+      
       <div class="match-history">
         <div class="match-history-item" :key="item" v-for="item in SummonerMatchHistoryDetails[0]"
           @click="toggleDetailedInfo">
@@ -53,10 +58,7 @@
                   v-for="lItems in ['item0','item1','item2','item3','item4','item5','item6']">
                   <div alt="" :style="players[lItems] == 0 ? '' : `background-image: url('https://ddragon.leagueoflegends.com/cdn/12.21.1/img/item/${ players[lItems] }.png');`">
                     <img width="100" height="100" />
-                    <div class="item-tooltip" v-if="players[lItems] != 0">
-                      <span class="item-header">{{ leagueItems[players[lItems]].name }}</span>
-                      <div class="item-info" v-html="leagueItems[players[lItems]].description"> </div>
-                    </div>
+                    <ItemTooltip :itemInfo="leagueItems[players[lItems]]" v-if="leagueItems[players[lItems]]" />
                   </div>
                 </div>
               </div>
@@ -133,10 +135,7 @@
                     v-for="lItems in ['item0','item1','item2','item3','item4','item5','item6']">
                     <div alt="" :style="players[lItems] == 0 ? '' : `background-image: url('https://ddragon.leagueoflegends.com/cdn/12.21.1/img/item/${ players[lItems] }.png');`">
                       <img width="100" height="100" />
-                      <div class="item-tooltip" v-if="players[lItems] != 0">
-                        <span class="item-header">{{ leagueItems[players[lItems]].name }}</span>
-                        <div class="item-info" v-html="leagueItems[players[lItems]].description"> </div>
-                      </div>
+                      <ItemTooltip :itemInfo="leagueItems[players[lItems]]" v-if="leagueItems[players[lItems]]" />
                     </div>
                   </div>
                 </div>
@@ -195,10 +194,7 @@
                     v-for="lItems in ['item0','item1','item2','item3','item4','item5','item6']">
                     <div alt="" :style="players[lItems] == 0 ? '' : `background-image: url('https://ddragon.leagueoflegends.com/cdn/12.21.1/img/item/${ players[lItems] }.png');`">
                       <img width="100" height="100" />
-                      <div class="item-tooltip" v-if="players[lItems] != 0">
-                        <span class="item-header">{{ leagueItems[players[lItems]].name }}</span>
-                        <div class="item-info" v-html="leagueItems[players[lItems]].description"> </div>
-                      </div>
+                      <ItemTooltip :itemInfo="leagueItems[players[lItems]]" v-if="leagueItems[players[lItems]]" />
                     </div>
                   </div>
                 </div>
@@ -213,6 +209,10 @@
 
 <script setup>
   import {ref} from 'vue';
+  import store from '@/modules/main';
+  import SummonerProfile from '@/components/SummonerProfile.vue';
+  import ItemTooltip from '@/components/ItemTooltip.vue';
+  
 
   let playerNameRef = ref(null);
   let playerName = ref(null);
@@ -223,9 +223,10 @@
   let SummonerMatchHistoryDetails = ref();
   let leagueItems = ref();
   let leagueSpells = ref();
+  const userID = store.getters.userId;
 
   //api key only last for 24hrs
-  const myapikey = "RGAPI-62866be6-9815-4893-b122-bc5bd95d43df";
+  const myapikey = "RGAPI-1c1e3e12-f76d-4026-850f-6eb6748bfc89";
 
   //gets the name of the spell from the id which is used to get the image 
   function getSpellName(spellId) {
@@ -314,13 +315,14 @@
     summonerMatchHistory.value = null;
     SummonerMatchHistoryDetails.value = null;
     playerName.value = playerNameRef.value.toLowerCase();
-    //console.log("getSummonerDetails runs");
+    
     const info = await fetch(
       `https://${ playerRegion.value }.api.riotgames.com/lol/summoner/v4/summoners/by-name/${ playerNameRef.value.toLowerCase() }?api_key=${myapikey}`
     );
     await info.json().then((data) => {
       summonerDetails.value = data;
       getSummonerMatchHistory(data.puuid);
+      console.log(data);
     });
   }
   //gets the match history of the player using the puuid with it you can get indept match details
@@ -386,31 +388,7 @@
     }
 
   }
-  .item-tooltip {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 300px;
-    background: grey;
-    border-radius: 5px;
-    display: flex;
-    color: white;
-    font-size: 12px;
-    transform: translate(-50%, 0);
-    transition: all 0.2s ease-in-out;
-    opacity: 0;
-    pointer-events: none;
-    flex-direction: column;
-    text-align: left;
-    padding: 10px;
-
-    .item-info {
-      width: 100%;
-      background: none;
-
-    }
-
-  }
+  
 
   .match-history-detailed-info {
     width: 100%;
